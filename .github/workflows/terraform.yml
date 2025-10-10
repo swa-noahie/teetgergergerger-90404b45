@@ -1,0 +1,146 @@
+name: Terraform Deploy (S3 Website)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "infra/**"
+      - "app/ui/**"
+      - ".luvlaunch/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      LUVLAUNCH_PROJECT_ID: "9de1c5a8-7bbb-4f64-b57e-a1ae3963ec20"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform -chdir=infra init -input=false
+
+      - name: Terraform Apply
+        run: terraform -chdir=infra apply -input=false -auto-approve
+
+      - name: Capture Terraform outputs
+        shell: bash
+        run: |
+          set -e
+          WEBSITE=$(terraform -chdir=infra output -raw ui_website_endpoint 2>/dev/null || echo "")
+          BUCKET=$(terraform -chdir=infra output -raw ui_bucket_name 2>/dev/null || echo "")
+          API_URL=$(terraform -chdir=infra output -raw api_base_url 2>/dev/null || echo "")
+          if [ -z "$API_URL" ]; then
+            echo "Terraform did not return an api_base_url output." >&2
+            exit 1
+          fi
+          echo "UI_BUCKET=$BUCKET" >> "$GITHUB_ENV"
+          echo "UI_WEBSITE=$WEBSITE" >> "$GITHUB_ENV"
+          echo "API_BASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "Captured outputs:"
+          echo "  UI bucket:           $BUCKET"
+          echo "  UI website endpoint: $WEBSITE"
+          echo "  API base URL:        $API_URL"
+
+      - name: Build UI
+        shell: bash
+        run: |
+          set -e
+          if [ -z "$API_BASE_URL" ]; then
+            echo "API_BASE_URL missing from Terraform outputs. Last captured value: ${API_BASE_URL:-<empty>}"; exit 1
+          fi
+          echo "API base URL: $API_BASE_URL"
+          if [ -f app/ui/package.json ]; then
+            cd app/ui
+            npm ci
+            API_BASE_URL="$API_BASE_URL" npm run build
+            if grep -q "__API_BASE__" dist/index.html; then
+              echo "API placeholder still present after build. Aborting."; exit 1
+            fi
+          else
+            echo "No UI package.json found; expecting pre-built assets under app/ui"
+          fi
+
+      - name: Upload UI to S3
+        shell: bash
+        run: |
+          set -e
+          BUCKET="${UI_BUCKET}"
+          if [ -z "$BUCKET" ]; then
+            echo "Bucket not found in Terraform outputs"; exit 1
+          fi
+          BASE_DIR=""
+          if [ -d app/ui/dist ]; then
+            BASE_DIR="app/ui/dist"
+          elif [ -d app/ui ]; then
+            BASE_DIR="app/ui"
+          else
+            echo "UI assets not found in app/ui. Ensure your UI build artifacts are checked in."
+            exit 1
+          fi
+          echo "Uploading contents of $BASE_DIR to s3://$BUCKET/"
+          find "$BASE_DIR" -type f -print0 | while IFS= read -r -d '' file; do
+            key="${file#$BASE_DIR/}"
+            if [ -z "$key" ]; then
+              key=$(basename "$file")
+            fi
+            mime=$(file --mime-type -b "$file" 2>/dev/null || echo "application/octet-stream")
+            aws s3api put-object --bucket "$BUCKET" --key "$key" --body "$file" --content-type "$mime"
+          done
+
+      - name: Commit outputs to repo
+        shell: bash
+        run: |
+          set -e
+          mkdir -p .luvlaunch
+          WEBSITE="${UI_WEBSITE}"
+          API_URL="${API_BASE_URL}"
+          UI_URL=""
+          DOMAIN_NAME=""
+          if [ -n "$WEBSITE" ]; then
+            UI_URL="http://$WEBSITE"
+            DOMAIN_NAME="$WEBSITE"
+          fi
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          cat > .luvlaunch/outputs.json <<EOF
+          {
+            "projectId": "9de1c5a8-7bbb-4f64-b57e-a1ae3963ec20",
+            "generated_at": "$TS",
+            "api_url": "$API_URL",
+            "ui_url": "$UI_URL",
+            "bucket": "${UI_BUCKET}",
+            "domain_name": "$DOMAIN_NAME"
+          }
+          EOF
+          git config user.name "luvlaunch-bot"
+          git config user.email "luvlaunch-bot@users.noreply.github.com"
+          git add .luvlaunch/outputs.json
+          git commit -m "ci: publish outputs (s3 website)" || echo "nothing to commit"
+          BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF#refs/heads/}}"
+          if ! git push; then
+            echo "git push failed; attempting to rebase and retry."
+            if git pull --rebase origin "$BRANCH"; then
+              if ! git push; then
+                echo "Warning: still unable to push outputs after rebase. Continuing without failing workflow."
+              fi
+            else
+              echo "git pull --rebase failed; skipping retry push. Continuing."
+            fi
+          fi
