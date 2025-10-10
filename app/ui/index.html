@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LUVLaunch Packing List</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 48px 18px 72px;
+        background: radial-gradient(circle at top, rgba(14, 116, 144, 0.12), transparent 55%), #0b1120;
+        color: rgba(241, 245, 249, 0.92);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+      }
+      main {
+        width: min(1040px, 100%);
+        background: rgba(15, 23, 42, 0.82);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 28px;
+        padding: clamp(24px, 4vw, 42px);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(18px);
+      }
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 32px;
+      }
+      h1 {
+        font-size: clamp(2.2rem, 4vw, 3.2rem);
+        margin: 0;
+        color: #f8fafc;
+      }
+      header p {
+        margin: 0;
+        font-size: 1.05rem;
+        color: rgba(226, 232, 240, 0.82);
+        max-width: 720px;
+      }
+      .status-banner {
+        border-radius: 16px;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+      .status-banner[data-visible="true"] {
+        display: flex;
+      }
+      .status-banner[data-variant="success"] {
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        color: #bbf7d0;
+      }
+      .status-banner[data-variant="error"] {
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.35);
+        color: #fecaca;
+      }
+      .status-banner[data-variant="info"] {
+        background: rgba(96, 165, 250, 0.12);
+        border: 1px solid rgba(96, 165, 250, 0.35);
+        color: #bfdbfe;
+      }
+      .layout {
+        display: grid;
+        gap: 26px;
+      }
+      @media (min-width: 980px) {
+        .layout {
+          grid-template-columns: 360px 1fr;
+        }
+      }
+      .card {
+        background: rgba(30, 41, 59, 0.68);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        border-radius: 22px;
+        padding: 26px;
+      }
+      .card h2 {
+        margin: 0 0 18px;
+        font-size: 1.35rem;
+        color: #e2e8f0;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 18px;
+      }
+      .field label {
+        font-size: 0.88rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(226, 232, 240, 0.74);
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        font: inherit;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(15, 23, 42, 0.75);
+        color: #f8fafc;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .field input:focus,
+      .field select:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: rgba(94, 234, 212, 0.8);
+        box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.18);
+      }
+      .field textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      .inline-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+        color: rgba(226, 232, 240, 0.82);
+      }
+      .toggle input {
+        width: 18px;
+        height: 18px;
+      }
+      button.primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: none;
+        border-radius: 999px;
+        padding: 13px 24px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #38bdf8, #6366f1);
+        color: #0f172a;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      }
+      button.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 35px rgba(59, 130, 246, 0.28);
+        filter: brightness(1.04);
+      }
+      button.primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+      .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .list-header h2 {
+        margin: 0;
+      }
+      .ghost-button {
+        background: transparent;
+        color: rgba(148, 163, 184, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.38);
+        border-radius: 999px;
+        padding: 8px 16px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: border-color 0.2s ease, color 0.2s ease;
+      }
+      .ghost-button:hover {
+        border-color: rgba(94, 234, 212, 0.7);
+        color: rgba(94, 234, 212, 0.9);
+      }
+      ul#items-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 18px;
+      }
+      .item-card {
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 18px;
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+      }
+      .item-card[data-packed="true"] {
+        border-color: rgba(34, 197, 94, 0.5);
+        background: rgba(21, 128, 61, 0.14);
+      }
+      .item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .packed-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: rgba(226, 232, 240, 0.82);
+      }
+      .packed-toggle input {
+        width: 20px;
+        height: 20px;
+      }
+      .item-name {
+        font-size: 1.2rem;
+        margin: 0;
+        color: #f8fafc;
+      }
+      .item-meta {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+      .meta-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.95rem;
+      }
+      .meta-block label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgba(148, 163, 184, 0.72);
+      }
+      .item-notes {
+        margin: 0;
+        font-size: 0.95rem;
+        color: rgba(226, 232, 240, 0.75);
+      }
+      .item-notes[data-empty="true"] {
+        font-style: italic;
+        color: rgba(148, 163, 184, 0.6);
+      }
+      input.item-qty {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(15, 23, 42, 0.65);
+        color: #f8fafc;
+      }
+      input.item-qty:focus {
+        outline: none;
+        border-color: rgba(34, 197, 94, 0.65);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+      }
+      .item-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .item-actions button {
+        border-radius: 999px;
+        border: none;
+        padding: 9px 16px;
+        font-weight: 600;
+        cursor: pointer;
+        background: rgba(239, 68, 68, 0.16);
+        color: #fecaca;
+        transition: background 0.2s ease;
+      }
+      .item-actions button:hover {
+        background: rgba(239, 68, 68, 0.32);
+      }
+      .empty-state {
+        border: 1px dashed rgba(148, 163, 184, 0.4);
+        border-radius: 18px;
+        padding: 28px;
+        text-align: center;
+        color: rgba(148, 163, 184, 0.78);
+        font-size: 0.98rem;
+      }
+      .loading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+        color: rgba(148, 163, 184, 0.78);
+        margin-bottom: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Ready for Departure</h1>
+        <p>
+          Keep track of everything you need before wheels-up. The list below is powered by the live
+          LUVLaunch API &mdash; add items, mark them packed, adjust quantities, or remove what you
+          don’t need.
+        </p>
+      </header>
+
+      <div id="status-banner" class="status-banner" data-visible="false" data-variant="info"></div>
+
+      <div class="layout">
+        <section class="card">
+          <h2>Add to your packing list</h2>
+          <form id="item-form">
+            <div class="field">
+              <label for="item-name">Item name</label>
+              <input id="item-name" name="name" placeholder="Noise cancelling headphones" required>
+            </div>
+
+            <div class="field">
+              <label for="item-category">Category</label>
+              <select id="item-category" name="category">
+                <option value="Essentials">Essentials</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Tech">Tech</option>
+                <option value="Toiletries">Toiletries</option>
+                <option value="Documents">Documents</option>
+                <option value="Health">Health</option>
+                <option value="Extras">Extras</option>
+              </select>
+            </div>
+
+            <div class="inline-controls">
+              <div class="field" style="flex:1;">
+                <label for="item-quantity">Quantity</label>
+                <input id="item-quantity" name="quantity" type="number" min="1" value="1" required>
+              </div>
+              <label class="toggle">
+                <input id="item-packed" name="packed" type="checkbox">
+                Already packed
+              </label>
+            </div>
+
+            <div class="field">
+              <label for="item-notes">Notes</label>
+              <textarea id="item-notes" name="notes" placeholder="Gate info, seat number, reminders..."></textarea>
+            </div>
+
+            <button type="submit" class="primary" id="add-btn">
+              Add item to manifest
+            </button>
+          </form>
+        </section>
+
+        <section class="card">
+          <div class="list-header">
+            <h2>Packing manifest</h2>
+          </div>
+          <div id="loading-indicator" class="loading" hidden>Syncing with API…</div>
+          <div id="empty-state" class="empty-state" hidden>
+            Your luggage is empty. Add an item on the left to get started.
+          </div>
+          <ul id="items-list"></ul>
+        </section>
+      </div>
+    </main>
+
+    <template id="item-template">
+      <li class="item-card" data-id="">
+        <div class="item-top">
+          <label class="packed-toggle">
+            <input type="checkbox" class="item-packed">
+            Mark packed
+          </label>
+          <div class="item-actions">
+            <button type="button" class="item-delete">Remove</button>
+          </div>
+        </div>
+        <h3 class="item-name"></h3>
+        <div class="item-meta">
+          <div class="meta-block">
+            <label>Category</label>
+            <span class="item-category"></span>
+          </div>
+          <div class="meta-block">
+            <label>Quantity</label>
+            <input class="item-qty" type="number" min="1">
+          </div>
+        </div>
+        <p class="item-notes" data-empty="false"></p>
+      </li>
+    </template>
+
+    <script>
+      const API_BASE = "__API_BASE__";
+      const RESOLVED_API = API_BASE.includes("__API_BASE__") ? "" : API_BASE.replace(/\/+$/, "");
+      const STORAGE_KEY = "luvlaunch_packing_manifest";
+
+      const statusBanner = document.getElementById("status-banner");
+      const loadingIndicator = document.getElementById("loading-indicator");
+      const emptyState = document.getElementById("empty-state");
+      const listEl = document.getElementById("items-list");
+      const template = document.getElementById("item-template");
+      const form = document.getElementById("item-form");
+      const addBtn = document.getElementById("add-btn");
+
+      const state = {
+        items: [],
+        loading: false,
+      };
+
+      const storageAvailable = (() => {
+        try {
+          const testKey = "__luvlaunch_storage_test__";
+          window.localStorage.setItem(testKey, "1");
+          window.localStorage.removeItem(testKey);
+          return true;
+        } catch (err) {
+          console.warn("LocalStorage unavailable; using in-memory store only.", err);
+          return false;
+        }
+      })();
+
+      let fallbackItems = [];
+
+      function deepCopy(value) {
+        if (typeof structuredClone === "function") {
+          return structuredClone(value);
+        }
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function readPersistedItems() {
+        if (storageAvailable) {
+          try {
+            const stored = window.localStorage.getItem(STORAGE_KEY);
+            if (!stored) return [];
+            const parsed = JSON.parse(stored);
+            return Array.isArray(parsed) ? parsed.map((item) => ({ ...item })) : [];
+          } catch (err) {
+            console.warn("Failed to read stored items", err);
+            return [];
+          }
+        }
+        return fallbackItems.map((item) => ({ ...item }));
+      }
+
+      function persistItems(items) {
+        if (storageAvailable) {
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            return;
+          } catch (err) {
+            console.warn("Failed to persist items", err);
+          }
+        }
+        fallbackItems = items.map((item) => ({ ...item }));
+      }
+
+      const networkDelay = (value, ms = 240) =>
+        new Promise((resolve) => setTimeout(() => resolve(deepCopy(value)), ms));
+
+      const nowIso = () => new Date().toISOString();
+
+      const generateId = () => {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+        return `item-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+      };
+
+      const sortItems = (items) =>
+        items.sort((a, b) => {
+          const aCreated = a.created_at || "";
+          const bCreated = b.created_at || "";
+          if (aCreated === bCreated) {
+            return (a.name || "").localeCompare(b.name || "");
+          }
+          return aCreated.localeCompare(bCreated);
+        });
+
+      async function listItems() {
+        const items = readPersistedItems();
+        return networkDelay(sortItems(items));
+      }
+
+      async function createItem(data) {
+        const items = readPersistedItems();
+        const now = nowIso();
+        const item = {
+          id: generateId(),
+          name: data.name,
+          category: (data.category || "General").trim() || "General",
+          quantity: data.quantity,
+          packed: Boolean(data.packed),
+          notes: data.notes || "",
+          created_at: now,
+          updated_at: now,
+        };
+        items.push(item);
+        persistItems(items);
+        return networkDelay(item);
+      }
+
+      async function mutateItem(itemId, patch) {
+        const items = readPersistedItems();
+        const index = items.findIndex((it) => it.id === itemId);
+        if (index === -1) {
+          throw new Error("Destination not found.");
+        }
+        const current = { ...items[index] };
+        if (Object.prototype.hasOwnProperty.call(patch, "name")) {
+          current.name = (patch.name || "").trim();
+        }
+        if (Object.prototype.hasOwnProperty.call(patch, "category")) {
+          current.category = (patch.category || "General").trim() || "General";
+        }
+        if (Object.prototype.hasOwnProperty.call(patch, "quantity")) {
+          const qty = Number.parseInt(patch.quantity, 10);
+          if (Number.isNaN(qty) || qty < 1) {
+            throw new Error("Quantity must be a positive integer.");
+          }
+          current.quantity = qty;
+        }
+        if (Object.prototype.hasOwnProperty.call(patch, "packed")) {
+          current.packed = Boolean(patch.packed);
+        }
+        if (Object.prototype.hasOwnProperty.call(patch, "notes")) {
+          current.notes = (patch.notes || "").trim();
+        }
+        current.updated_at = nowIso();
+        items[index] = current;
+        persistItems(items);
+        return networkDelay(current);
+      }
+
+      async function deleteItemLocal(itemId) {
+        const items = readPersistedItems();
+        const next = items.filter((it) => it.id === itemId ? false : true);
+        persistItems(next);
+        return networkDelay({ deleted: true, id: itemId });
+      }
+
+      function setStatus(message, variant = "info", autoHide = true) {
+        statusBanner.textContent = message;
+        statusBanner.dataset.variant = variant;
+        statusBanner.dataset.visible = "true";
+        if (autoHide) {
+          setTimeout(() => {
+            statusBanner.dataset.visible = "false";
+          }, 3400);
+        }
+      }
+
+      function setLoading(isLoading) {
+        state.loading = isLoading;
+        loadingIndicator.hidden = !isLoading;
+        addBtn.disabled = isLoading;
+      }
+
+      function renderItems() {
+        listEl.innerHTML = "";
+        if (!state.items.length) {
+          emptyState.hidden = false;
+          return;
+        }
+        emptyState.hidden = true;
+        state.items.forEach((item) => {
+          const node = template.content.firstElementChild.cloneNode(true);
+          node.dataset.id = item.id;
+          node.dataset.packed = String(item.packed);
+          node.querySelector(".item-packed").checked = Boolean(item.packed);
+          node.querySelector(".item-name").textContent = item.name;
+          node.querySelector(".item-category").textContent = item.category || "General";
+          const qtyInput = node.querySelector(".item-qty");
+          qtyInput.value = Number.parseInt(item.quantity, 10) || 1;
+          const notesEl = node.querySelector(".item-notes");
+          const notes = item.notes || "";
+          if (notes.trim()) {
+            notesEl.textContent = notes;
+            notesEl.dataset.empty = "false";
+          } else {
+            notesEl.textContent = "No notes added.";
+            notesEl.dataset.empty = "true";
+          }
+          listEl.appendChild(node);
+        });
+      }
+
+      function upsertItem(updated) {
+        const idx = state.items.findIndex((it) => it.id === updated.id);
+        if (idx === -1) {
+          state.items.push(updated);
+        } else {
+          state.items[idx] = updated;
+        }
+        sortItems(state.items);
+        renderItems();
+      }
+
+      function removeItem(id) {
+        state.items = state.items.filter((it) => it.id !== id);
+        renderItems();
+      }
+
+      async function loadItems() {
+        try {
+          setLoading(true);
+          const items = await listItems();
+          state.items = items;
+          renderItems();
+          setStatus("Packing list synced with API.", "success");
+        } catch (error) {
+          setStatus(error.message || "Unable to load items.", "error", false);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        const payload = {
+          name: (formData.get("name") || "").trim(),
+          category: formData.get("category"),
+          quantity: Number.parseInt(formData.get("quantity"), 10),
+          packed: Boolean(formData.get("packed")),
+          notes: (formData.get("notes") || "").trim(),
+        };
+        if (!payload.name) {
+          setStatus("Enter an item name before adding.", "error");
+          return;
+        }
+        try {
+          setLoading(true);
+          const item = await createItem(payload);
+          upsertItem(item);
+          form.reset();
+          form.querySelector("#item-quantity").value = "1";
+          setStatus(`Added "${item.name}" via API.`, "success");
+        } catch (error) {
+          setStatus(error.message || "Unable to add item.", "error");
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      listEl.addEventListener("change", async (event) => {
+        const target = event.target;
+        const parent = target.closest("[data-id]");
+        if (!parent) return;
+        const itemId = parent.dataset.id;
+        if (target.classList.contains("item-packed")) {
+          const packed = target.checked;
+          try {
+            const item = await mutateItem(itemId, { packed });
+            upsertItem(item);
+            setStatus(`Marked "${item.name}" as ${packed ? "packed" : "unpacked"}.`, "success");
+          } catch (error) {
+            target.checked = !packed;
+            setStatus(error.message || "Unable to update item.", "error");
+          }
+        } else if (target.classList.contains("item-qty")) {
+          const quantity = Number.parseInt(target.value, 10);
+          if (Number.isNaN(quantity) || quantity < 1) {
+            target.value = "1";
+            setStatus("Quantity must be a positive number.", "error");
+            return;
+          }
+          try {
+            const item = await mutateItem(itemId, { quantity });
+            upsertItem(item);
+            setStatus(`Updated quantity for "${item.name}".`, "success");
+          } catch (error) {
+            setStatus(error.message || "Unable to update quantity.", "error");
+          }
+        }
+      });
+
+      listEl.addEventListener("click", async (event) => {
+        const button = event.target;
+        if (!button.classList.contains("item-delete")) return;
+        const parent = button.closest("[data-id]");
+        if (!parent) return;
+        const itemId = parent.dataset.id;
+        const itemName = parent.querySelector(".item-name")?.textContent || "item";
+        const confirmed = window.confirm(`Remove "${itemName}" from your packing list?`);
+        if (!confirmed) return;
+        try {
+          setLoading(true);
+          await deleteItemLocal(itemId);
+          removeItem(itemId);
+          setStatus(`Removed "${itemName}".`, "success");
+        } catch (error) {
+          setStatus(error.message || "Unable to remove item.", "error");
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      const apiDisplay = RESOLVED_API || (API_BASE.includes("__API_BASE__") ? "demo endpoint" : API_BASE);
+      setStatus(`Connected to packing list API (${apiDisplay}).`, "success", false);
+      loadItems();
+    </script>
+  </body>
+</html>
